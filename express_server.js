@@ -59,6 +59,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 })
 
+
+app.get("/urls/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars);
+});
+
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
@@ -88,15 +96,6 @@ app.post("/urls/:id", (req, res) => {
 });
 
 
-
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-})
-
-app.get("/hello", (req, res) => {
-  res.send("<html><bode>Hello <b>World</b><body></html>\n")
-})
 
 
 
