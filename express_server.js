@@ -1,9 +1,15 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 function generateRandomString(length) {
   const characters =
@@ -19,9 +25,6 @@ function generateRandomString(length) {
   return randomString;
 }
 
-
-
-app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -95,12 +98,18 @@ app.get("/hello", (req, res) => {
   res.send("<html><bode>Hello <b>World</b><body></html>\n")
 })
 
+
+
+// login and out 
 app.post("/login", (req, res) => {
   const userName = req.body.username;
   res.cookie("username", userName)
   res.redirect(`/urls`);
 })
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect(`/urls`);
 });
+
+

@@ -21,10 +21,12 @@
 
     <div class="navbar-nav ml-auto">
       <% if (username) { %>
-      <span>
-        Logged in as: <%= username %> User!
-        <button type="submit" class="btn btn-outline-dark">Logout</button>
+      <span class="navbar-text mr-3  text-dark">
+        Logged in as: <strong><%= username %></strong> User!
       </span>
+      <form action="/logout" class="inline" method="POST">
+        <button type="submit" class="btn btn-outline-dark">Logout</button>
+      </form>
       <% } else { %>
       <form class="form-inline" action="/login" method="POST">
         <div class="form-group mx-sm-3 mb-2">
