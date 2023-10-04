@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+app.use(express.urlencoded({ extended: true }));
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -23,19 +27,25 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
-app.use(express.urlencoded({ extended: true }));
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase}
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  }
   res.render("urls_index", templateVars);
 })
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 
@@ -49,7 +59,10 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
-  const templateVars = { id, longURL }
+  const templateVars = {
+    id, longURL,
+    username: req.cookies["username"]
+  };
   res.render("urls_show", templateVars)
 })
 
