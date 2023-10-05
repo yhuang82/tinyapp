@@ -4,6 +4,7 @@ const PORT = 8080;
 app.set("view engine", "ejs"); // configuration
 app.use(express.urlencoded({ extended: true })); //cretes req.body
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 app.use(cookieParser()); // creates req.cookies
 
 
@@ -62,15 +63,15 @@ const urlDatabase = {
 };
 
 const users = {
-  aJ48lW: {
-    id: "aJ48lW",
+  aJ48: {
+    id: "aJ48",
     email: "a@a.com",
-    password: "123",
+    password: "$2a$10$IFSkPnH2zOx2mnb/Yj4OLui57mBszPIZkbgFqumHg2dvhltR/6VQS",
   },
-  user2RandomID: {
-    id: "user2RandomID",
+  use2: {
+    id: "use2",
     email: "b@b.com",
-    password: "123",
+    password: "$2a$10$IFSkPnH2zOx2mnb/Yj4OLui57mBszPIZkbgFqumHg2dvhltR/6VQS",
   },
 };
 
@@ -253,13 +254,16 @@ app.post("/register", (req, res) => {
   // add the user to the userobj
   const id = Math.random().toString(36).substring(2, 6);
 
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
+
   const user = {
     id: id,
     email: email,
-    password: password
+    password: hash
   }
-
   users[id] = user;
+  console.log(users);
   res.cookie("user_id", id);
   //send the user somewhere
   res.redirect("/urls");
@@ -294,7 +298,8 @@ app.post("/login", (req, res) => {
   }
 
   //do the password NOT match
-  if (foundUser.password !== password) {
+  const result = bcrypt.compareSync(password, foundUser.password);
+  if (!result) {
     res.status(403).send('passwords do not match')
   }
 
