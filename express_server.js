@@ -125,6 +125,14 @@ app.post("/urls/:id", (req, res) => {
 
 
 
+//GET /register
+app.get("/register", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const templateVars = {
+    user: users[userId],
+  };
+  res.render("urls_register", templateVars);
+});
 
 //POST /register
 app.post("/register", (req, res) => {
@@ -161,8 +169,19 @@ app.post("/register", (req, res) => {
   res.redirect(`/urls`);
 })
 
+// GET /login
+app.get('/login', (req, res) => {
+  const userId = req.cookies["user_id"];
+  const templateVars = {
+    user: users[userId],
+  };
+  res.render("urls_login", templateVars);
+})
 
-
+// POST /login
+app.post("/login", (req, res) => {
+  res.render("/urls_login");
+});
 
 
 // login and out 

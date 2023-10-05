@@ -22,23 +22,17 @@
     <div class="navbar-nav ml-auto">
       <% if (user) { %>
       <span class="navbar-text mr-3 text-dark">
-        Logged in as: <strong><%= user.email %></strong> User!
+        <strong>Logged in as: <%= user.email %> User!</strong>
       </span>
       <form action="/logout" class="inline" method="POST">
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
       <% } else { %>
-      <form class="form-inline" action="/login" method="POST">
-        <div class="form-group mx-sm-3 mb-2">
-          <input
-            type="text"
-            class="form-control"
-            id="username"
-            name="username"
-            placeholder="Username"
-          />
-        </div>
-        <button type="submit" class="btn btn-outline-dark">Login</button>
+      <form class="form-inline" action="/login" method="GET">
+        <button type="submit" class="btn btn-outline">Login</button>
+      </form>
+      <form class="form-inline" action="/register" method="GET">
+        <button type="submit" class="btn btn-outline">Register</button>
       </form>
       <% } %>
     </div>
