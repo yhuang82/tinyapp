@@ -90,8 +90,6 @@ app.get("/urls", (req, res) => {
     return res.status(403).send("Please login first");
   } 
   const userIdArr = urlsForUser(userId);
-  console.log("userarr");
-  console.log("userarr", userIdArr);
   const templateVars = {
     urls: urlDatabase,
     user: users[userId],
@@ -107,8 +105,12 @@ app.post("/urls", (req, res) => {
   }
   const longURL = req.body.longURL;
   const shortURL = gen(6);
-  urlDatabase[shortURL].longURL = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  // create a new url long and short
+  urlDatabase[shortURL] = {
+    longURL: longURL,
+    userId: userId
+  };
+  res.redirect("/urls/${shortURL}");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -151,21 +153,59 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 })
 
+
+// POST edit a new longURL based on the current shortURL
+//used to test for the a hacker edit the url
+//curl -b "user_id=b6UTxQ" -X POST -d "longURL=http://www.lighthouselabs.com" localhost:8080/urls/b6UTxQ
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
+  const userId = req.cookies["user_id"];
+  // return a relevant error message if id does not exist
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Error 404: URL Not Found");
+  }
+
+  // return a relevant error message if the user is not logged in
+  if (!userId) {
+    return res.status(403).send("Please login first");
+  }
+
+  //return a relevant error message if the user does not own the URL
+  if (urlDatabase[id].userId !== userId) {
+    return res.status(403).send("No permision to add");
+  }
+
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userId: "aJ48lW",
   };
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
+  const userId = req.cookies["user_id"];
+  // return a relevant error message if id does not exist
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Error 404: URL Not Found");
+  }
+
+  // return a relevant error message if the user is not logged in
+  if (!userId) {
+    return res.status(403).send("Please login first");
+  }
+
+  //return a relevant error message if the user does not own the URL
+  if (urlDatabase[id].userId !== userId) {
+    return res.status(403).send("No permision to delete");
+  }
+
   delete urlDatabase[id];
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 });
 
+
+// redirect to the longURL
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   for (key in urlDatabase) {
