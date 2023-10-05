@@ -11,7 +11,17 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function generateRandomString(length) {
+const getUserByEmail = (inputEmail) => {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === inputEmail) {
+      return user;
+    }
+  }
+  return null;
+};
+
+const gen = function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
@@ -70,7 +80,7 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
-  const shortURL = generateRandomString(6);
+  const shortURL = gen(6);
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 })
@@ -128,13 +138,8 @@ app.post("/register", (req, res) => {
   }
 
   //look for a user based on the email provided
-  let foundUser = null;
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      foundUser = user
-    }
-  }
+  const foundUser = getUserByEmail(email);
+
   // did we find a user?
   if (foundUser) {
     return res.status(400).send("a user with that email is already registered");
