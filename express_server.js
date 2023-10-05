@@ -180,19 +180,42 @@ app.get('/login', (req, res) => {
 
 // POST /login
 app.post("/login", (req, res) => {
-  res.render("/urls_login");
+  // grab the information from the incoing body
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // did they NOT submit an email and password?
+  if (!email || !password) {
+    return res.status(400).send('passwords do not match')
+  }
+
+  //lookup the user based on their email address
+  const foundUser = getUserByEmail(email);
+
+  //did we Not find a user?
+  if (!foundUser) {
+    return res.status(403).send('no user with that email found')
+  }
+
+  //do the password NOT match
+  if (foundUser.password !== password) {
+    res.status(403).send('passwords do not match')
+  }
+
+  //the user is who they say they are!!!
+  //set a cookie
+  res.cookie("user_id", foundUser.id);
+
+  //send the user somewhere
+  res.redirect("/urls");
 });
 
 
-// login and out 
-app.post("/login", (req, res) => {
-  const userName = req.body.username;
-  res.redirect(`/urls`);
-})
 
+// logout 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(`/urls`);
+  res.redirect("/login");
 });
 
 
