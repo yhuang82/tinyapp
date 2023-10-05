@@ -69,8 +69,22 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 })
 
+app.post("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  if (!userId) {
+    return res.status(403).send("Please login first");
+  }
+  const longURL = req.body.longURL;
+  const shortURL = gen(6);
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
+  if (!userId) {
+    return res.redirect("/login")
+  }
   const templateVars = {
     user: users[userId]
   };
@@ -78,12 +92,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 
-app.post("/urls", (req, res) => {
-  const longURL = req.body.longURL;
-  const shortURL = gen(6);
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
-})
 
 
 app.get("/urls/register", (req, res) => {
@@ -107,8 +115,14 @@ app.get("/urls/:id", (req, res) => {
 
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  const id = req.params.id;
+  for (key in urlDatabase) {
+    if (key === id) {
+      const longURL = urlDatabase[id];
+      return res.redirect(longURL);
+    }
+  }
+  res.status(404).send("Error 404: URL Not Found");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -166,7 +180,7 @@ app.post("/register", (req, res) => {
   users[id] = user;
   res.cookie("user_id", id);
   //send the user somewhere
-  res.redirect(`/urls`);
+  res.redirect("/urls");
 })
 
 // GET /login
