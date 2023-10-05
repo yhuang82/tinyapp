@@ -30,26 +30,26 @@
           </tr>
         </thead>
         <tbody>
-          <% for (let id in urls) { %>
+          <% arr.forEach(x => { %>
           <tr>
-            <td><%= id %></td>
-            <td><%= urls[id] %></td>
+            <td><%= x.shortURL %></td>
+            <td><%= x.longURL %></td>
             <td>
-              <form method="GET" action="/urls/<%= id %>">
+              <form method="GET" action="/urls/<%= x.shortURL %>">
                 <button type="submit" class="btn btn-outline-primary">
                   Edit
                 </button>
               </form>
             </td>
             <td>
-              <form method="POST" action="/urls/<%= id %>/delete">
+              <form method="POST" action="/urls/<%= x.shortURL %>/delete">
                 <button type="submit" class="btn btn-outline-danger">
                   Delete
                 </button>
               </form>
             </td>
           </tr>
-          <% } %>
+          <% }) %>
         </tbody>
       </table>
       <a href="#" class="btn btn-primary">Shorten a New URL</a>

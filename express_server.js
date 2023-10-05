@@ -21,6 +21,20 @@ const getUserByEmail = (inputEmail) => {
   return null;
 };
 
+//which returns the URLs where the userID is equal to the id of the currently logged-in user.
+const urlsForUser = (id) => {
+  const userUrls = []
+  for (key in urlDatabase) {
+    if (urlDatabase[key].userId === id) {
+      userUrls.push({
+        shortURL: key,
+        longURL: urlDatabase[key].longURL
+      });
+    }
+  }
+  return userUrls;
+}
+
 const gen = function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -37,23 +51,33 @@ const gen = function generateRandomString(length) {
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userId: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userId: "aJ48lW",
+  },
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+  aJ48lW: {
+    id: "aJ48lW",
+    email: "a@a.com",
+    password: "123",
   },
   user2RandomID: {
     id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
+    email: "b@b.com",
+    password: "123",
   },
 };
 
+// arr.forEach(x => {
+//   x.shortURL
+//   x.longURL
+// });
 
 
 app.get("/", (req, res) => {
@@ -62,9 +86,16 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
+  if (!userId) {
+    return res.status(403).send("Please login first");
+  } 
+  const userIdArr = urlsForUser(userId);
+  console.log("userarr");
+  console.log("userarr", userIdArr);
   const templateVars = {
     urls: urlDatabase,
     user: users[userId],
+    arr: userIdArr,
   };
   res.render("urls_index", templateVars);
 })
@@ -76,7 +107,7 @@ app.post("/urls", (req, res) => {
   }
   const longURL = req.body.longURL;
   const shortURL = gen(6);
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -92,8 +123,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 
-
-
 app.get("/urls/register", (req, res) => {
   const userId = req.cookies["user_id"];
   const templateVars = {
@@ -103,39 +132,52 @@ app.get("/urls/register", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies["user_id"];
   const id = req.params.id;
-  const longURL = urlDatabase[id];
-  const userId = req.cookies["user_id"]
+  //The individual URL pages should not be accessible to users who are not logged in.
+  if (!userId) {
+    return res.status(403).send("Please login first");
+  }
+  //The individual URL pages should not be accesible if the URL does not belong to them.
+  if (userId !== urlDatabase[id].userId) {
+    return res.status(404).send("No permision here");
+  }
+  const longURL = urlDatabase[id].longURL;
   const templateVars = {
-    id, longURL,
-    user: users[userId]
+    id,
+    longURL,
+    user: users[userId],
   };
-  res.render("urls_show", templateVars)
+  res.render("urls_show", templateVars);
 })
 
-
-app.get("/u/:id", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  for (key in urlDatabase) {
-    if (key === id) {
-      const longURL = urlDatabase[id];
-      return res.redirect(longURL);
-    }
-  }
-  res.status(404).send("Error 404: URL Not Found");
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userId: "aJ48lW",
+  };
+  res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect(`/urls`);
-})
-
-app.post("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls`);
 });
+
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  for (key in urlDatabase) {
+    if (key === id) {
+      const longURL = urlDatabase[id].longURL;
+      return res.redirect(longURL);
+    }
+  }
+  res.status(404).send("Error 404: URL Not Found");
+});
+
+
 
 
 
