@@ -20,9 +20,9 @@
     </div>
 
     <div class="navbar-nav ml-auto">
-      <% if (username) { %>
-      <span class="navbar-text mr-3  text-dark">
-        Logged in as: <strong><%= username %></strong> User!
+      <% if (user) { %>
+      <span class="navbar-text mr-3 text-dark">
+        Logged in as: <strong><%= user.email %></strong> User!
       </span>
       <form action="/logout" class="inline" method="POST">
         <button type="submit" class="btn btn-outline-dark">Logout</button>
