@@ -21,9 +21,10 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const getUserByEmail = (inputEmail) => {
-  for (const userId in users) {
-    const user = users[userId];
+// helper function:
+const getUserByEmail = (inputEmail, database) => {
+  for (const userId in database) {
+    let user = database[userId];
     if (user.email === inputEmail) {
       return user;
     }
@@ -81,7 +82,7 @@ const users = {
     id: "aJ48",
     email: "b@b.com",
     password: "$2a$10$IFSkPnH2zOx2mnb/Yj4OLui57mBszPIZkbgFqumHg2dvhltR/6VQS",
-  },
+  }
 };
 
 
@@ -245,7 +246,7 @@ app.post("/register", (req, res) => {
   }
 
   //look for a user based on the email provided
-  const foundUser = getUserByEmail(email);
+  const foundUser = getUserByEmail(email, users);
 
   // did we find a user?
   if (foundUser) {
@@ -291,7 +292,8 @@ app.post("/login", (req, res) => {
   }
 
   //lookup the user based on their email address
-  const foundUser = getUserByEmail(email);
+  const foundUser = getUserByEmail(email, users);
+  console.log(foundUser);
 
   //did we Not find a user?
   if (!foundUser) {
