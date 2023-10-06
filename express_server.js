@@ -2,11 +2,20 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 app.set("view engine", "ejs"); // configuration
-app.use(express.urlencoded({ extended: true })); //cretes req.body
-const cookieParser = require("cookie-parser");
-const bcrypt = require("bcryptjs");
-app.use(cookieParser()); // creates req.cookies
 
+const cookieSession = require("cookie-session");
+const bcrypt = require("bcryptjs");
+
+
+
+
+// middleware
+app.use(express.urlencoded({ extended: true })); //cretes req.body
+//creates req.session
+app.use(cookieSession({
+  name: "whatever",
+  keys: ["abc"]
+}));
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -54,11 +63,11 @@ const gen = function generateRandomString(length) {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userId: "aJ48lW",
+    userId: "aJ48",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userId: "aJ48lW",
+    userId: "aJ48",
   },
 };
 
@@ -69,24 +78,17 @@ const users = {
     password: "$2a$10$IFSkPnH2zOx2mnb/Yj4OLui57mBszPIZkbgFqumHg2dvhltR/6VQS",
   },
   use2: {
-    id: "use2",
+    id: "aJ48",
     email: "b@b.com",
     password: "$2a$10$IFSkPnH2zOx2mnb/Yj4OLui57mBszPIZkbgFqumHg2dvhltR/6VQS",
   },
 };
 
-// arr.forEach(x => {
-//   x.shortURL
-//   x.longURL
-// });
 
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   if (!userId) {
     return res.status(403).send("Please login first");
   } 
@@ -100,7 +102,7 @@ app.get("/urls", (req, res) => {
 })
 
 app.post("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   if (!userId) {
     return res.status(403).send("Please login first");
   }
@@ -115,7 +117,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   if (!userId) {
     return res.redirect("/login")
   }
@@ -127,7 +129,7 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/register", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const templateVars = {
     user: users[userId]
   };
@@ -135,7 +137,7 @@ app.get("/urls/register", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const id = req.params.id;
   //The individual URL pages should not be accessible to users who are not logged in.
   if (!userId) {
@@ -160,7 +162,7 @@ app.get("/urls/:id", (req, res) => {
 //curl -b "user_id=b6UTxQ" -X POST -d "longURL=http://www.lighthouselabs.com" localhost:8080/urls/b6UTxQ
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   // return a relevant error message if id does not exist
   if (!urlDatabase[id]) {
     return res.status(404).send("Error 404: URL Not Found");
@@ -185,7 +187,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   // return a relevant error message if id does not exist
   if (!urlDatabase[id]) {
     return res.status(404).send("Error 404: URL Not Found");
@@ -224,7 +226,7 @@ app.get("/u/:id", (req, res) => {
 
 //GET /register
 app.get("/register", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const templateVars = {
     user: users[userId],
   };
@@ -264,14 +266,13 @@ app.post("/register", (req, res) => {
   }
   users[id] = user;
   console.log(users);
-  res.cookie("user_id", id);
-  //send the user somewhere
+  req.session.user_id = id; 
   res.redirect("/urls");
 })
 
 // GET /login
 app.get('/login', (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const templateVars = {
     user: users[userId],
   };
@@ -305,7 +306,7 @@ app.post("/login", (req, res) => {
 
   //the user is who they say they are!!!
   //set a cookie
-  res.cookie("user_id", foundUser.id);
+  req.session.user_id = foundUser.id;
 
   //send the user somewhere
   res.redirect("/urls");
@@ -315,7 +316,7 @@ app.post("/login", (req, res) => {
 
 // logout 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
