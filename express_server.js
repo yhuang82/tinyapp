@@ -5,6 +5,7 @@ app.set("view engine", "ejs"); // configuration
 
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const { getUserByEmail } = require("./helpers.js");
 
 
 
@@ -21,16 +22,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-// helper function:
-const getUserByEmail = (inputEmail, database) => {
-  for (const userId in database) {
-    let user = database[userId];
-    if (user.email === inputEmail) {
-      return user;
-    }
-  }
-  return null;
-};
+
 
 //which returns the URLs where the userID is equal to the id of the currently logged-in user.
 const urlsForUser = (id) => {
